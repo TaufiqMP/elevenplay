@@ -53,3 +53,58 @@ export async function getPublishedAccountByCode(code) {
   if (error) throw error
   return data
 }
+
+
+//PEMBATAS UNTUK FUNCTION ADMIN =========================================================================================================
+//Admin: list semua akun (termasuk draft dan archived), bisa difilter lewat status
+export async function getAllAccounts({ page, limit, status }) {
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  let query = supabase
+    .from('accounts')
+    .select(ADMIN_LIST_FIELDS, { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (status) query = query.eq('status', status)
+
+  const { data, count, error } = await query
+  if (error) throw error
+  return { data, count }
+}
+
+//Admin: tambah akun baru
+export async function createAccount(body) {
+  const { data, error } = await supabase
+    .from('accounts')
+    .insert(pickFields(body))
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+//Admin: ubah sebagian field akun berdasarkan id
+export async function updateAccount(id, body) {
+  const { data, error } = await supabase
+    .from('accounts')
+    .update({ ...pickFields(body), updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .maybeSingle()
+
+  if (error) throw error
+  return data
+}
+
+//Admin: hapus akun. Default hanya diarsipkan, permanen kalau permanent = true
+export async function deleteAccount(id, { permanent = false } = {}) {
+  const query = permanent
+    ? supabase.from('accounts').delete().eq('id', id)
+    : supabase.from('accounts').update({ status: 'archived' }).eq('id', id)
+
+  const { error } = await query
+  if (error) throw error
+}
