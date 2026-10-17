@@ -31,11 +31,11 @@ export async function listAccounts(req, res) {
 
 //POST /admin/accounts : tambah akun baru
 export async function createAccount(req, res) {
-  const { code, title } = req.body
+  const { title } = req.body
 
-  if (!code || !title) {
+  if (!title) {
     return res.status(422).json({
-      error: { code: 'VALIDATION_ERROR', message: 'code dan title wajib diisi' },
+      error: { code: 'VALIDATION_ERROR', message: 'title wajib diisi' },
     })
   }
 

@@ -5,7 +5,7 @@ const ADMIN_LIST_FIELDS = `${LIST_FIELDS}, platform, status, last_checked_at, up
 
 //Daftar kolom yang boleh diisi dari request admin, supaya field lain diabaikan
 const ALLOWED_FIELDS = [
-  'code', 'title', 'subtitle', 'tier_label', 'platform',
+  'title', 'subtitle', 'tier_label', 'platform',
   'main_image_url', 'gallery',
   'team_strength', 'epic', 'big_time', 'showtime', 'coins', 'gp', 'division',
   'note', 'detail', 'linked_to', 'login_method', 'last_checked_at',
