@@ -4,9 +4,9 @@ import { supabase } from './config/supabase.js'
 import routes from './routes/index.js'
 
 const app = express()
-app.use(cors({ origin: process.env.FRONTEND_URL }))
+app.use(cors());
 app.use(express.json())
-
+/*
 //Daftar alamat frontend yang boleh memanggil API, dipisah koma di .env
 const allowedOrigins = (process.env.FRONTEND_URL || '')
   .split(',')
@@ -22,6 +22,7 @@ app.use(cors({
     callback(null, false)
   },
 }))
+*/
 
 app.get('/health', async (req, res) => {
   const { error } = await supabase.from('accounts').select('id').limit(1)

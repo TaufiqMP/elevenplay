@@ -29,6 +29,20 @@ export async function listAccounts(req, res) {
   }
 }
 
+//GET /admin/accounts/:id : detail akun, termasuk akun draft dan archived
+export async function getAccount(req, res) {
+  try {
+    const account = await accountService.getAccountById(req.params.id)
+
+    if (!account) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Akun tidak ditemukan' } })
+    }
+    res.json(account)
+  } catch (err) {
+    sendError(res, err)
+  }
+}
+
 //POST /admin/accounts : tambah akun baru
 export async function createAccount(req, res) {
   const { title } = req.body

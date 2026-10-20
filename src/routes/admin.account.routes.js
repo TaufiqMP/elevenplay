@@ -8,6 +8,7 @@ const router = Router()
 router.use(requireAdmin)
 
 router.get('/', controller.listAccounts)
+router.get('/:id', controller.getAccount)
 router.post('/', controller.createAccount)
 router.patch('/:id', controller.updateAccount)
 router.delete('/:id', controller.deleteAccount)

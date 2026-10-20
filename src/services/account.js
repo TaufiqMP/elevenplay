@@ -74,6 +74,18 @@ export async function getAllAccounts({ page, limit, status }) {
   return { data, count }
 }
 
+//Admin: detail akun berdasarkan id, termasuk akun draft dan archived
+export async function getAccountById(id) {
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) throw error
+  return data
+}
+
 //Admin: tambah akun baru
 export async function createAccount(body) {
   const { data, error } = await supabase
