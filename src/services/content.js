@@ -1,7 +1,9 @@
 import { supabase } from '../config/supabase.js'
 
 const LIST_FIELDS = 'id, title, slug, cover_image_url, category_id, author_id, status, published_at, created_at, content_categories(name), profiles(full_name)'
-const DETAIL_FIELDS = 'id, title, slug, body, cover_image_url, gallery, category_id, author_id, status, published_at, created_at, updated_at, content_categories(name), profiles(full_name)'
+//Daftar publik ikut membawa body supaya frontend bisa membuat ringkasan di kartu beranda
+const PUBLIC_LIST_FIELDS = `${LIST_FIELDS}, body`
+const DETAIL_FIELDS ='id, title, slug, body, cover_image_url, gallery, category_id, author_id, status, published_at, created_at, updated_at, content_categories(name), profiles(full_name)'
 
 const CONTENT_FIELDS = [
   'title', 'body', 'cover_image_url', 'gallery',
@@ -88,7 +90,7 @@ export async function getPublishedContents({ page, limit, q }) {
 
   let query = supabase
     .from('contents')
-    .select(LIST_FIELDS, { count: 'exact' })
+    .select(PUBLIC_LIST_FIELDS, { count: 'exact' })
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString())
     .order('published_at', { ascending: false })
@@ -203,10 +205,12 @@ export async function updateContent(id, body) {
 //SQL: update contents set status = 'archived' where id = {id}
 //atau delete from contents where id = {id} kalau permanent
 export async function deleteContent(id, { permanent = false } = {}) {
+  //Hapus permanen hanya untuk berita yang sudah di Sampah (status archived)
   const query = permanent
-    ? supabase.from('contents').delete().eq('id', id)
+    ? supabase.from('contents').delete().eq('id', id).eq('status', 'archived')
     : supabase.from('contents').update({
       status: 'archived',
+      archived_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }).eq('id', id)
 

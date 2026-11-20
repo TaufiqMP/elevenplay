@@ -18,3 +18,25 @@ export async function requireAdmin(req, res, next) {
   req.user = data.claims
   next()
 }
+
+//Login biasa (member atau admin). Dipakai untuk fitur forum: id penulis diambil dari req.user.sub
+export async function requireMember(req, res, next) {
+  try {
+    const header = req.headers.authorization || ''
+    const token = header.startsWith('Bearer ') ? header.slice(7) : null
+    if (!token) {
+      return res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Silakan login terlebih dahulu' } })
+    }
+
+    const { data, error } = await supabase.auth.getClaims(token)
+    if (error || !data) {
+      return res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Token tidak valid' } })
+    }
+
+    req.user = data.claims
+    next()
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: 'Terjadi kesalahan pada server' } })
+  }
+}

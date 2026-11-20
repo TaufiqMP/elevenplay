@@ -86,11 +86,24 @@ export async function getAccountById(id) {
   return data
 }
 
-//Admin: tambah akun baru
+//SQL: select id from accounts where code = {code}
+//Dipakai untuk memastikan kode yang diketik admin belum dipakai akun lain
+export async function codeExists(code) {
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('id')
+    .eq('code', code)
+    .maybeSingle()
+
+  if (error) throw error
+  return Boolean(data)
+}
+
+//Admin: tambah akun baru. Kode diisi admin (bukan dibuat database), jadi dikirim terpisah dari pickFields
 export async function createAccount(body) {
   const { data, error } = await supabase
     .from('accounts')
-    .insert(pickFields(body))
+    .insert({ ...pickFields(body), code: body.code })
     .select()
     .single()
 
@@ -113,9 +126,10 @@ export async function updateAccount(id, body) {
 
 //Admin: hapus akun. Default hanya diarsipkan, permanen kalau permanent = true
 export async function deleteAccount(id, { permanent = false } = {}) {
+  //Hapus permanen hanya untuk akun yang sudah di Sampah (status archived)
   const query = permanent
-    ? supabase.from('accounts').delete().eq('id', id)
-    : supabase.from('accounts').update({ status: 'archived' }).eq('id', id)
+    ? supabase.from('accounts').delete().eq('id', id).eq('status', 'archived')
+    : supabase.from('accounts').update({ status: 'archived', archived_at: new Date().toISOString() }).eq('id', id)
 
   const { error } = await query
   if (error) throw error

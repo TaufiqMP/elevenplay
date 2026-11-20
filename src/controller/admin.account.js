@@ -43,9 +43,10 @@ export async function getAccount(req, res) {
   }
 }
 
-//POST /admin/accounts : tambah akun baru
+//POST /admin/accounts : tambah akun baru. Kode akun wajib diisi admin, bebas format, maks. 30 karakter
 export async function createAccount(req, res) {
   const { title } = req.body
+  const code = String(req.body.code ?? '').trim()
 
   if (!title) {
     return res.status(422).json({
@@ -53,8 +54,26 @@ export async function createAccount(req, res) {
     })
   }
 
+  if (!code) {
+    return res.status(422).json({
+      error: { code: 'VALIDATION_ERROR', message: 'Kode akun wajib diisi' },
+    })
+  }
+
+  if (code.length > 30) {
+    return res.status(422).json({
+      error: { code: 'VALIDATION_ERROR', message: 'Kode akun maksimal 30 karakter' },
+    })
+  }
+
   try {
-    const account = await accountService.createAccount(req.body)
+    if (await accountService.codeExists(code)) {
+      return res.status(409).json({
+        error: { code: 'CONFLICT', message: 'Kode akun sudah dipakai akun lain' },
+      })
+    }
+
+    const account = await accountService.createAccount({ ...req.body, code })
     res.status(201).json(account)
   } catch (err) {
     sendError(res, err)
